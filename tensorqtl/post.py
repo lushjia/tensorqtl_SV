@@ -56,9 +56,9 @@ def calculate_qvalues(res_df, fdr=0.05, qvalue_lambda=None, logger=None):
         ub = res_df.loc[res_df['qval'] > fdr, 'pval_beta'].sort_values()
 
         if lb.shape[0] > 0:  # significant phenotypes
-            lb = lb[-1]
+            lb = lb.values[-1]
             if ub.shape[0] > 0:
-                ub = ub[0]
+                ub = ub.values[0]
                 pthreshold = (lb+ub)/2
             else:
                 pthreshold = lb
