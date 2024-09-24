@@ -374,7 +374,7 @@ def get_cis_ranges(phenotype_pos_df, chr_variant_dfs, window, verbose=True):
     """
 
     start, end indexes (inclusive)
-    # output a np array for each phenotype to record variants in the +- window interval
+    # output an np array for each phenotype to record variants in the +- window interval
     """
     # check phenotypes & calculate genotype ranges
     # get genotype indexes corresponding to cis-window of each phenotype
@@ -386,19 +386,38 @@ def get_cis_ranges(phenotype_pos_df, chr_variant_dfs, window, verbose=True):
     drop_ids = []
     cis_ranges = {}
     n = len(phenotype_pos_df)
+    # sort chr_variant_dfs start (column "pos") and end (column "end")
+    ## since only one chr in my data
+    chrom = phenotype_pos_dict[phenotype_pos_df.index[0]]['chr']
+    # sort by pos
+    chr_variant_dfs_sortpos = chr_variant_dfs[chrom].sort_values(by='pos')
+    # sort by end 
+    chr_variant_dfs_sortend = chr_variant_dfs[chrom].sort_values(by='end')
     for k, phenotype_id in enumerate(phenotype_pos_df.index, 1):
         if verbose and (k % 1000 == 0 or k == n):
             print(f'\r  * checking phenotypes: {k}/{n}',  end='' if k != n else None)
 
         pos = phenotype_pos_dict[phenotype_id]
-        chrom = pos['chr']
+        # chrom = pos['chr']
         # m = len(chr_variant_dfs[chrom]['pos'].values)
         # lb = bisect.bisect_left(chr_variant_dfs[chrom]['pos'].values, pos['start'] - window)
         # ub = bisect.bisect_right(chr_variant_dfs[chrom]['pos'].values, pos['end'] + window)
         # determin if the variants in the phenotype +- window region
         r = []
-        in_boolean =(chr_variant_dfs[chrom]['end'] >= pos['start'] - window) & (chr_variant_dfs[chrom]['pos'] <= pos['end'] + window)
-        r = chr_variant_dfs[chrom]['index'].values[in_boolean]
+        # pos (start) index that in the window
+        lb = bisect.bisect_left(chr_variant_dfs_sortpos['pos'].values, pos['start'] - window)
+        ub = bisect.bisect_right(chr_variant_dfs_sortpos['pos'].values, pos['end'] + window)
+        start_index = chr_variant_dfs_sortpos['index'].values[lb:ub]
+        # end index that in the window 
+        lb = bisect.bisect_left(chr_variant_dfs_sortend['end'].values, pos['start'] - window)
+        ub = bisect.bisect_right(chr_variant_dfs_sortend['end'].values, pos['end'] + window)
+        end_index = chr_variant_dfs_sortend['index'].values[lb:ub]
+        # get the union of the two index
+        r = np.union1d(start_index, end_index)
+        
+        # my old solution 
+        # in_boolean =(chr_variant_dfs[chrom]['end'] >= pos['start'] - window) & (chr_variant_dfs[chrom]['pos'] <= pos['end'] + window)
+        # r = chr_variant_dfs[chrom]['index'].values[in_boolean]
 
         # if lb != ub:
         #     r = chr_variant_dfs[chrom]['index'].values[[lb, ub - 1]]
