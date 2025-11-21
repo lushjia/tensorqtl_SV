@@ -1,12 +1,11 @@
 ## tensorQTL_SV
-accomodate tensorqtl (https://github.com/broadinstitute/tensorqtl.git) for SV architecture    
-so long as an SV span touch the gene window, the SV is included to compute correlation with the gene
+accomodate tensorqtl (https://github.com/broadinstitute/tensorqtl.git) for structural variant(SV) architecture    
 
-mainly change genotypeio.py InputGeneratorCis function
+Any structural variant (SV) that overlaps or touches the gene window is now included for correlation analysis with that gene.
 
-input variant_df should be 4 columns: snp(index of input df), chrom, pos (refer to start of variants), end
+The main modification is in the genotypeio.py file, within the InputGeneratorCis function.
 
-only one chromosome at a time
+The input variant_df should contain four columns: snp(index of input df), chrom, pos (start position of the variant), end
 
-
+one chromosome at a time
 
